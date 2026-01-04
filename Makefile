@@ -32,11 +32,14 @@ DOCKER_IMAGE = kfs-builder
 all: docker-iso
 
 clean:
-	rm -rf $(BUILD_DIR)
+	@chmod -R u+w $(BUILD_DIR) 2>/dev/null || true
+	@rm -rf $(BUILD_DIR)
 
 fclean: clean
-	rm -f $(KERNEL) $(ISO)
-	rm -rf $(ISO_DIR)
+	@chmod u+w $(KERNEL) $(ISO) 2>/dev/null || true
+	@chmod -R u+w $(ISO_DIR) 2>/dev/null || true
+	@rm -f $(KERNEL) $(ISO)
+	@rm -rf $(ISO_DIR)
 
 re: fclean all
 
@@ -53,10 +56,7 @@ debug: all
 	qemu-system-i386 -kernel $(KERNEL) -s -S
 
 docker-iso: build-docker
-	docker run --rm -v $(PWD):/kfs -w /kfs -u $(shell id -u):$(shell id -g) $(DOCKER_IMAGE) make manualy-iso
-
-docker-iso: build-docker
-	docker run --rm -v $(PWD):/kfs -w /kfs -u $(shell id -u):$(shell id -g) $(DOCKER_IMAGE) make manualy-bin
+	@docker run --rm -v $(PWD):/kfs -w /kfs $(DOCKER_IMAGE) sh -c "make manualy-iso && chmod -R 777 /kfs"
 
 docker-rebuild:
 	docker build -t $(DOCKER_IMAGE) .
