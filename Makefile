@@ -6,7 +6,7 @@ BUILD_DIR = .build
 
 ASFLAGS = --32
 CFLAGS = -m32 -ffreestanding -fno-builtin -fno-exceptions -fno-stack-protector \
-         -nostdlib -nodefaultlibs -Wall -Wextra -O2 -fno-rtti
+         -nostdlib -nodefaultlibs -Wall -Wextra -O2
 LDFLAGS = -m elf_i386 -T linker.ld
 
 ASM_SRC = boot/boot.S
