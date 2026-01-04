@@ -65,7 +65,7 @@ void screen_switch(uint8_t screen_num)
 	if (screen_num == active_screen)
 		return;
 
-	screen_save(active_screen);
+	screen_sync_current();
 
 	active_screen = screen_num;
 	screen_restore(active_screen);
@@ -74,4 +74,9 @@ void screen_switch(uint8_t screen_num)
 uint8_t screen_get_active(void)
 {
 	return active_screen;
+}
+
+void screen_sync_current(void)
+{
+	screen_save(active_screen);
 }

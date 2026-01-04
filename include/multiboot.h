@@ -3,18 +3,14 @@
 
 #include "types.h"
 
-/* Multiboot header magic number */
 #define MULTIBOOT_HEADER_MAGIC		0x1BADB002
 
-/* Multiboot bootloader magic number */
 #define MULTIBOOT_BOOTLOADER_MAGIC	0x2BADB002
 
-/* Multiboot flags */
 #define MULTIBOOT_FLAG_ALIGN		0x00000001
 #define MULTIBOOT_FLAG_MEMINFO		0x00000002
 #define MULTIBOOT_FLAG_VIDEO		0x00000004
 
-/* Multiboot info structure passed by bootloader */
 struct multiboot_info {
 	uint32_t flags;
 	uint32_t mem_lower;
@@ -39,4 +35,4 @@ struct multiboot_info {
 	uint16_t vbe_interface_len;
 } __attribute__((packed));
 
-#endif /* MULTIBOOT_H */
+#endif

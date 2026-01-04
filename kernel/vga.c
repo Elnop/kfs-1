@@ -1,4 +1,5 @@
 #include "vga.h"
+#include "screen.h"
 #include "../lib/string.h"
 
 #define VGA_MEMORY 0xB8000
@@ -33,6 +34,18 @@ static inline uint8_t vga_entry_color(uint8_t fg, uint8_t bg)
 	return fg | (bg << 4);
 }
 
+static void vga_disable_cursor(void)
+{
+	outb(VGA_CTRL_PORT, 0x0A);
+	outb(VGA_DATA_PORT, 0x20);
+}
+
+static void vga_enable_cursor(void)
+{
+	outb(VGA_CTRL_PORT, 0x0A);
+	outb(VGA_DATA_PORT, 0x0E);
+}
+
 void vga_init(void)
 {
 	cursor_x = 0;
@@ -54,16 +67,17 @@ void vga_clear(void)
 
 void vga_scroll(void)
 {
-	for (size_t row = 0; row < VGA_HEIGHT - 1; row++) {
-		for (size_t col = 0; col < VGA_WIDTH; col++) {
-			vga_buffer[row * VGA_WIDTH + col] =
-				vga_buffer[(row + 1) * VGA_WIDTH + col];
-		}
-	}
+	vga_disable_cursor();
+
+	memmove(vga_buffer,
+	        vga_buffer + VGA_WIDTH,
+	        (VGA_HEIGHT - 1) * VGA_WIDTH * sizeof(uint16_t));
 
 	uint16_t blank = vga_entry(' ', current_color);
 	for (size_t col = 0; col < VGA_WIDTH; col++)
 		vga_buffer[(VGA_HEIGHT - 1) * VGA_WIDTH + col] = blank;
+
+	vga_enable_cursor();
 }
 
 void vga_putchar(char c)
@@ -71,27 +85,56 @@ void vga_putchar(char c)
 	if (c == '\n') {
 		cursor_x = 0;
 		cursor_y++;
+		if (cursor_y >= VGA_HEIGHT) {
+			vga_scroll();
+			cursor_y = VGA_HEIGHT - 1;
+			screen_sync_current();
+		}
 	} else if (c == '\r') {
 		cursor_x = 0;
 	} else if (c == '\t') {
 		cursor_x = (cursor_x + 4) & ~(4 - 1);
+		if (cursor_x >= VGA_WIDTH) {
+			cursor_x = 0;
+			cursor_y++;
+			if (cursor_y >= VGA_HEIGHT) {
+				vga_scroll();
+				cursor_y = VGA_HEIGHT - 1;
+				screen_sync_current();
+			}
+		}
 	} else if (c == '\b') {
-		if (cursor_x > 0)
+		if (cursor_x > 0) {
 			cursor_x--;
+			size_t index = cursor_y * VGA_WIDTH + cursor_x;
+			vga_buffer[index] = vga_entry(' ', current_color);
+		} else if (cursor_y > 0) {
+			cursor_y--;
+			cursor_x = VGA_WIDTH - 1;
+			while (cursor_x > 0) {
+				size_t index = cursor_y * VGA_WIDTH + cursor_x;
+				if ((vga_buffer[index] & 0xFF) != ' ')
+					break;
+				cursor_x--;
+			}
+			size_t index = cursor_y * VGA_WIDTH + cursor_x;
+			vga_buffer[index] = vga_entry(' ', current_color);
+		}
 	} else {
-		size_t index = cursor_y * VGA_WIDTH + cursor_x;
-		vga_buffer[index] = vga_entry(c, current_color);
+		if (cursor_y < VGA_HEIGHT) {
+			size_t index = cursor_y * VGA_WIDTH + cursor_x;
+			vga_buffer[index] = vga_entry(c, current_color);
+		}
 		cursor_x++;
-	}
-
-	if (cursor_x >= VGA_WIDTH) {
-		cursor_x = 0;
-		cursor_y++;
-	}
-
-	if (cursor_y >= VGA_HEIGHT) {
-		vga_scroll();
-		cursor_y = VGA_HEIGHT - 1;
+		if (cursor_x >= VGA_WIDTH) {
+			cursor_x = 0;
+			cursor_y++;
+			if (cursor_y >= VGA_HEIGHT) {
+				vga_scroll();
+				cursor_y = VGA_HEIGHT - 1;
+				screen_sync_current();
+			}
+		}
 	}
 
 	vga_update_cursor();

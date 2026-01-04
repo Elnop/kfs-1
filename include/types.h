@@ -1,7 +1,6 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-/* Basic type definitions for kernel */
 
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
@@ -25,4 +24,4 @@ typedef unsigned int size_t;
 #define false 0
 #endif
 
-#endif /* TYPES_H */
+#endif

@@ -29,29 +29,28 @@ make debug     # Lance en mode debug (GDB sur port 1234)
 
 ### Docker
 - Docker installé et accessible
-- Sur les sessions 42 : `docker login registry.42.fr`
 
 ### Sans Docker (mode natif)
 - `gcc` avec support 32-bit
 - `as`, `ld`, `grub-mkrescue`, `xorriso`, `mtools`
 - `qemu-system-i386` (pour tester)
 
-Utilisez `make manualy` pour compiler sans Docker.
+Utilisez `make manualy-iso` pour compiler sans Docker.
 
 ## Fonctionnalités
 
 ### Partie obligatoire
-- ✅ Kernel bootable avec GRUB (multiboot)
-- ✅ Code ASM + C
-- ✅ Affiche "42" à l'écran
-- ✅ Bibliothèque kernel de base
+- Kernel bootable avec GRUB (multiboot)
+- Code ASM + C
+- Affiche "42" à l'écran
+- Bibliothèque kernel de base
 
 ### Bonus
-- ✅ Support couleurs (16 couleurs VGA)
-- ✅ Scroll et curseur hardware
-- ✅ printk() style printf
-- ✅ Support clavier (scancodes)
-- ✅ Multi-écrans (F1-F5 pour switcher)
+- Support couleurs (16 couleurs VGA)
+- Scroll et curseur hardware
+- printk() style printf
+- Support clavier (scancodes)
+- Multi-écrans (F1-F5 pour switcher)
 
 ## Structure du projet
 
@@ -71,25 +70,6 @@ kfs-1/
 
 - `kernel.bin` : 16 KB (kernel compilé)
 - `kfs.iso` : 4.9 MB (image ISO bootable)
-
-## Dépannage
-
-### "Docker is not installed"
-```bash
-# Installer Docker
-https://docs.docker.com/get-docker/
-
-# Sur 42
-docker login registry.42.fr
-```
-
-### Compiler sans Docker
-```bash
-make native    # Nécessite grub-mkrescue
-```
-
-### Problème de permissions
-Les fichiers sont créés avec vos permissions utilisateur (pas root).
 
 ## Auteur
 

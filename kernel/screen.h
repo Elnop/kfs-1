@@ -15,4 +15,6 @@ void screen_save(uint8_t screen_num);
 
 void screen_restore(uint8_t screen_num);
 
+void screen_sync_current(void);
+
 #endif
