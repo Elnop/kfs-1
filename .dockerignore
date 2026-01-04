@@ -1,0 +1,9 @@
+.build/
+*.o
+kfs.iso
+kernel.bin
+iso/
+.git/
+*.swp
+*~
+.DS_Store

@@ -25,24 +25,11 @@ KERNEL = kernel.bin
 ISO = kfs.iso
 ISO_DIR = iso
 
-all: $(ISO)
+DOCKER_IMAGE = kfs-builder
 
-$(ISO): $(KERNEL) grub.cfg
-	mkdir -p $(ISO_DIR)/boot/grub
-	cp $(KERNEL) $(ISO_DIR)/boot/
-	cp grub.cfg $(ISO_DIR)/boot/grub/
-	./make_iso.sh $(ISO_DIR) $(ISO)
+.PHONY: all clean fclean re run run-iso run-kvm debug manualy-iso manualy-bin
 
-$(KERNEL): $(OBJ)
-	$(LD) $(LDFLAGS) -o $@ $^
-
-$(BUILD_DIR)/%.o: %.S
-	@mkdir -p $(dir $@)
-	$(AS) $(ASFLAGS) $< -o $@
-
-$(BUILD_DIR)/%.o: %.c
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+all: docker-iso
 
 clean:
 	rm -rf $(BUILD_DIR)
@@ -53,16 +40,52 @@ fclean: clean
 
 re: fclean all
 
-run: $(KERNEL)
+run: all
 	qemu-system-i386 -kernel $(KERNEL)
 
-run-iso: $(ISO)
+run-iso: all
 	qemu-system-i386 -cdrom $(ISO)
 
-run-kvm: $(KERNEL)
+run-kvm: all
 	qemu-system-i386 -enable-kvm -kernel $(KERNEL)
 
-debug: $(KERNEL)
+debug: all
 	qemu-system-i386 -kernel $(KERNEL) -s -S
 
-.PHONY: all clean fclean re run run-kvm debug
+docker-iso: build-docker
+	docker run --rm -v $(PWD):/kfs -w /kfs -u $(shell id -u):$(shell id -g) $(DOCKER_IMAGE) make manualy-iso
+
+docker-iso: build-docker
+	docker run --rm -v $(PWD):/kfs -w /kfs -u $(shell id -u):$(shell id -g) $(DOCKER_IMAGE) make manualy-bin
+
+docker-rebuild:
+	docker build -t $(DOCKER_IMAGE) .
+
+manualy-iso: $(ISO)
+
+manualy-bin: $(ISO)
+
+$(ISO): $(KERNEL) grub.cfg
+	mkdir -p $(ISO_DIR)/boot/grub
+	cp $(KERNEL) $(ISO_DIR)/boot/
+	cp grub.cfg $(ISO_DIR)/boot/grub/
+	$(GRUB_MKRESCUE) -o $(ISO) $(ISO_DIR)
+
+$(KERNEL): $(OBJ)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+$(BUILD_DIR)/%.o: %.S
+	mkdir -p $(dir $@)
+	$(AS) $(ASFLAGS) $< -o $@
+
+$(BUILD_DIR)/%.o: %.c
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+build-docker:
+	if ! docker image inspect $(DOCKER_IMAGE) >/dev/null 2>&1; then \
+		docker build -t $(DOCKER_IMAGE) . || exit 1; \
+	fi
+
+rtfm-qemu:
+	man qemu-system-i386
