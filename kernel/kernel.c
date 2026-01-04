@@ -22,6 +22,7 @@ static void display_welcome_message(void)
 	printk("  - printf-style formatting\n\n");
 	vga_set_color(VGA_YELLOW, VGA_BLACK);
 	printk("Press F1-F5 to switch screens\n");
+	printk("Use arrow keys to move cursor\n");
 	printk("Type to see keyboard input\n\n");
 	vga_set_color(VGA_WHITE, VGA_BLACK);
 }
@@ -48,6 +49,18 @@ static void keyboard_loop(void)
 		if (key >= KEY_F1 && key <= KEY_F5) {
 			uint8_t screen_num = key - KEY_F1;
 			screen_switch(screen_num);
+		} else if (key == KEY_UP) {
+			vga_move_cursor_up();
+			screen_sync_current();
+		} else if (key == KEY_DOWN) {
+			vga_move_cursor_down();
+			screen_sync_current();
+		} else if (key == KEY_LEFT) {
+			vga_move_cursor_left();
+			screen_sync_current();
+		} else if (key == KEY_RIGHT) {
+			vga_move_cursor_right();
+			screen_sync_current();
 		} else {
 			printk("%c", (char)key);
 		}

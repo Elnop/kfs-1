@@ -121,6 +121,11 @@ int keyboard_get_char(void)
 			continue;
 		}
 
+		if (scancode == KEY_UP || scancode == KEY_DOWN ||
+		    scancode == KEY_LEFT || scancode == KEY_RIGHT) {
+			return scancode;
+		}
+
 		char c = keyboard_scancode_to_char(scancode);
 		if (c != 0)
 			return c;

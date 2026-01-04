@@ -80,6 +80,38 @@ void vga_scroll(void)
 	vga_enable_cursor();
 }
 
+void vga_move_cursor_up(void)
+{
+	if (cursor_y > 0) {
+		cursor_y--;
+		vga_update_cursor();
+	}
+}
+
+void vga_move_cursor_down(void)
+{
+	if (cursor_y < VGA_HEIGHT - 1) {
+		cursor_y++;
+		vga_update_cursor();
+	}
+}
+
+void vga_move_cursor_left(void)
+{
+	if (cursor_x > 0) {
+		cursor_x--;
+		vga_update_cursor();
+	}
+}
+
+void vga_move_cursor_right(void)
+{
+	if (cursor_x < VGA_WIDTH - 1) {
+		cursor_x++;
+		vga_update_cursor();
+	}
+}
+
 void vga_putchar(char c)
 {
 	if (c == '\n') {

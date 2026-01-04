@@ -41,4 +41,9 @@ void vga_update_cursor(void);
 
 void vga_scroll(void);
 
+void vga_move_cursor_up(void);
+void vga_move_cursor_down(void);
+void vga_move_cursor_left(void);
+void vga_move_cursor_right(void);
+
 #endif
