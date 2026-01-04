@@ -31,7 +31,7 @@ $(ISO): $(KERNEL) grub.cfg
 	mkdir -p $(ISO_DIR)/boot/grub
 	cp $(KERNEL) $(ISO_DIR)/boot/
 	cp grub.cfg $(ISO_DIR)/boot/grub/
-	MTOOLS_SKIP_CHECK=1 $(GRUB_MKRESCUE) -o $(ISO) $(ISO_DIR)
+	./make_iso.sh $(ISO_DIR) $(ISO)
 
 $(KERNEL): $(OBJ)
 	$(LD) $(LDFLAGS) -o $@ $^
